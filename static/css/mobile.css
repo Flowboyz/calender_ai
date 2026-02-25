@@ -1,0 +1,314 @@
+/*
+ * mobile.css — ChronoMind Mobile Edition
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Add this to index.html inside <head>, after the closing </style> tag:
+ *
+ *   <link rel="stylesheet" href="/static/mobile.css">
+ *
+ * Transforms the two-column desktop layout into a single-column mobile UI
+ * with a bottom tab bar for navigation between Calendar, Events, and Search.
+ * Optimised for screens 480px and below.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Fira+Code:wght@400;500&family=Jost:wght@300;400;500&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE BREAKPOINT — everything inside applies only on phones
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* ── BASE ── */
+  html, body {
+    overflow: hidden;
+    height: 100%;
+    height: 100dvh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 0.75rem 1.1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    height: 54px;
+  }
+
+  .logo { font-size: 1.45rem; }
+
+  .today-badge {
+    font-size: 0.6rem;
+    padding: 0.22rem 0.6rem;
+  }
+
+  .header-sub { display: none; }
+
+  /* ── KILL DESKTOP GRID — stack everything ── */
+  .app {
+    display: block;
+    height: 100dvh;
+    padding-top: 54px;   /* header height */
+    padding-bottom: 60px; /* tab bar height */
+    overflow: hidden;
+  }
+
+  /* ── LEFT & RIGHT become full-screen panels ── */
+  .left, .right {
+    position: fixed;
+    top: 54px;
+    left: 0;
+    right: 0;
+    bottom: 60px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: none;          /* hidden by default; JS toggles via .tab-active */
+    flex-direction: column;
+    border: none;
+    width: 100%;
+  }
+
+  .left.tab-active,
+  .right.tab-active {
+    display: flex;
+  }
+
+  /* ── CALENDAR PANEL ── */
+  .cal-wrap {
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .cal-nav {
+    margin-bottom: 0.75rem;
+  }
+
+  .cal-title { font-size: 1.4rem; }
+  .cal-year  { font-size: 0.75rem; }
+
+  .btn-nav {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.68rem;
+  }
+
+  /* Tighter calendar grid on small screens */
+  .cal-grid { gap: 2px; }
+
+  .dlabel {
+    font-size: 0.55rem;
+    padding: 0.25rem 0;
+  }
+
+  .cday {
+    padding: 4px 1px 3px;
+    border-radius: 6px;
+  }
+
+  .dnum { font-size: 0.72rem; }
+
+  .pip { width: 3px; height: 3px; }
+
+  /* ── EVENTS PANEL (inside .left, below calendar) ── */
+  .events-wrap {
+    flex: 1;
+    padding: 1rem 1rem 1.5rem;
+    overflow-y: auto;
+  }
+
+  .ev-section-title {
+    font-size: 1.05rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .ev-count { font-size: 0.6rem; }
+
+  .event-card {
+    padding: 0.65rem 0.8rem;
+    border-radius: 9px;
+    margin-bottom: 0.4rem;
+  }
+
+  .ev-name  { font-size: 0.84rem; }
+  .ev-time  { font-size: 0.58rem; }
+  .ev-desc  { font-size: 0.72rem; }
+
+  .empty-note { font-size: 0.85rem; }
+
+  /* ── RIGHT PANEL (Add + Search) ── */
+  .right {
+    flex-direction: column;
+    overflow-y: auto;
+    background: var(--paper);
+  }
+
+  .add-box {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .box-title {
+    font-size: 1rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .field { margin-bottom: 0.45rem; }
+
+  .field label { font-size: 0.55rem; }
+
+  input[type=text],
+  input[type=date],
+  input[type=time],
+  textarea {
+    font-size: 16px; /* prevents iOS auto-zoom on focus */
+    padding: 0.55rem 0.7rem;
+    border-radius: 8px;
+  }
+
+  textarea { height: 60px; }
+
+  .two-col { gap: 0.4rem; }
+
+  .date-hint { font-size: 0.58rem; }
+
+  .btn-add {
+    padding: 0.65rem;
+    font-size: 0.88rem;
+    border-radius: 9px;
+    margin-top: 0.5rem;
+  }
+
+  /* ── SEARCH BOX ── */
+  .search-box {
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .search-title { font-size: 1rem; margin-bottom: 0.4rem; }
+
+  .search-sub {
+    font-size: 0.58rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .chips {
+    gap: 0.3rem;
+    margin-bottom: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    font-size: 0.6rem;
+    padding: 4px 9px;
+    border-radius: 100px;
+  }
+
+  .search-row { gap: 0.4rem; margin-bottom: 0.55rem; }
+
+  .btn-search {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.72rem;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  .search-result-label { font-size: 0.58rem; margin-bottom: 0.45rem; }
+
+  .search-results { overflow-y: auto; flex: 1; }
+
+  .search-event {
+    padding: 0.55rem 0.7rem;
+    border-radius: 8px;
+    margin-bottom: 0.35rem;
+  }
+
+  .se-name { font-size: 0.83rem; }
+  .se-date { font-size: 0.58rem; }
+  .se-desc { font-size: 0.7rem; }
+
+  /* ── TOAST ── */
+  .toast {
+    bottom: 70px; /* float above tab bar */
+    font-size: 0.68rem;
+    padding: 0.5rem 1rem;
+    max-width: 80vw;
+    text-align: center;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     BOTTOM TAB BAR
+     Three tabs: Calendar · Events · Search/Add
+     Injected by the JS below via  initMobileNav()
+     ═══════════════════════════════════════════════════════════════════════ */
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--paper);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: stretch;
+    z-index: 200;
+    backdrop-filter: blur(10px);
+  }
+
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tab-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.15s;
+  }
+
+  .tab-btn.active {
+    color: var(--rust);
+  }
+
+  .tab-btn.active svg {
+    stroke: var(--rust);
+  }
+
+  /* Active indicator dot above active tab */
+  .tab-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 28px;
+    height: 2px;
+    background: var(--rust);
+    border-radius: 0 0 3px 3px;
+  }
+
+} /* end @media (max-width: 480px) */
+
+

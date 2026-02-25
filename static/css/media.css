@@ -1,0 +1,472 @@
+/*
+ * media.css — ChronoMind Media Edition
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Drop this file into /static/ and link it in index.html AFTER the <style>
+ * block to apply the media theme:
+ *
+ *   <link rel="stylesheet" href="/static/media.css">
+ *
+ * Theme: Dark broadcast studio — deep blacks, electric cyan accents,
+ * scanline texture, mono typefaces throughout. Built for a media/newsroom
+ * environment tracking broadcasts, deadlines, releases and air-times.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap');
+
+/* ── DESIGN TOKENS ── */
+:root {
+  --ink:      #0d0f14;
+  --paper:    #111418;
+  --cream:    #181c22;
+  --warm:     #2e3440;
+  --rust:     #00c8ff;       /* cyan — primary accent  */
+  --rust-lt:  rgba(0,200,255,0.08);
+  --gold:     #ff5f1f;       /* orange — secondary accent */
+  --gold-lt:  rgba(255,95,31,0.1);
+  --sage:     #39d98a;       /* green — confirm/success  */
+  --sage-lt:  rgba(57,217,138,0.08);
+  --muted:    #5a6478;
+  --border:   #1f2530;
+  --shadow:   rgba(0,0,0,0.5);
+  --text:     #c8d0de;
+}
+
+/* ── BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--paper);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+  background-image:
+    /* scanline overlay */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.12) 2px,
+      rgba(0,0,0,0.12) 4px
+    ),
+    /* ambient glow */
+    radial-gradient(ellipse at 20% 0%,   rgba(0,200,255,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(255,95,31,0.04)  0%, transparent 50%);
+}
+
+/* ── HEADER ── */
+.header {
+  background: rgba(13,15,20,0.96);
+  border-bottom: 1px solid var(--border);
+  border-bottom-color: var(--rust);
+  backdrop-filter: blur(12px);
+  padding: 0.85rem 2rem;
+  box-shadow: 0 0 30px rgba(0,200,255,0.08);
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(0,200,255,0.4);
+}
+
+.logo em {
+  color: var(--rust);
+  font-style: normal;
+  text-shadow: 0 0 12px rgba(0,200,255,0.7);
+}
+
+.today-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem;
+  background: transparent;
+  color: var(--rust);
+  border: 1px solid var(--rust);
+  padding: 0.25rem 0.7rem;
+  border-radius: 3px;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 8px rgba(0,200,255,0.2), inset 0 0 8px rgba(0,200,255,0.04);
+}
+
+.header-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* ── LAYOUT ── */
+.app {
+  grid-template-columns: 1fr 370px;
+  height: calc(100vh - 57px);
+}
+
+/* ── CALENDAR WRAP ── */
+.cal-wrap {
+  background: var(--ink);
+  border-bottom: 1px solid var(--border);
+  padding: 1.4rem 2rem 1rem;
+}
+
+.cal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+
+.cal-year {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--rust);
+  margin-left: 0.4rem;
+}
+
+.btn-nav {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 3px;
+  padding: 0.3rem 0.65rem;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
+}
+
+.btn-nav:hover {
+  border-color: var(--rust);
+  color: var(--rust);
+  box-shadow: 0 0 8px rgba(0,200,255,0.2);
+}
+
+/* ── CALENDAR GRID ── */
+.dlabel {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  padding: 0.35rem 0;
+}
+
+.cday {
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: all 0.12s;
+}
+
+.cday:hover:not(.empty) {
+  background: var(--cream);
+  border-color: var(--border);
+}
+
+.cday.today {
+  background: var(--gold-lt);
+  border-color: var(--gold);
+  box-shadow: 0 0 10px rgba(255,95,31,0.15);
+}
+
+.cday.today .dnum {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.cday.selected {
+  background: rgba(0,200,255,0.12);
+  border-color: var(--rust);
+  box-shadow: 0 0 12px rgba(0,200,255,0.2);
+}
+
+.cday.selected .dnum {
+  color: var(--rust) !important;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(0,200,255,0.5);
+}
+
+.cday.selected .pip {
+  background: var(--rust);
+  box-shadow: 0 0 4px rgba(0,200,255,0.6);
+}
+
+.dnum {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.cday.other .dnum { color: #2a3040; }
+
+.pip {
+  background: var(--rust);
+  box-shadow: 0 0 3px rgba(0,200,255,0.4);
+}
+
+/* ── EVENTS WRAP ── */
+.events-wrap {
+  background: var(--paper);
+  padding: 1.2rem 2rem 2rem;
+}
+
+.ev-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+  margin-bottom: 0.8rem;
+}
+
+.ev-count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--rust);
+  letter-spacing: 0.08em;
+}
+
+.section-rule span {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+}
+
+.section-rule::before,
+.section-rule::after {
+  background: var(--border);
+}
+
+/* ── EVENT CARDS ── */
+.event-card {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: border-color 0.14s, box-shadow 0.14s;
+}
+
+.event-card:hover {
+  border-color: rgba(0,200,255,0.3);
+  box-shadow: 0 0 16px rgba(0,200,255,0.08);
+}
+
+.ev-bar { background: var(--rust); }
+.ev-bar.upcoming { background: var(--gold); }
+
+.ev-name {
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: #e8edf5;
+}
+
+.ev-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--rust);
+}
+
+.ev-date-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--gold);
+}
+
+.ev-desc { color: var(--muted); font-size: 0.74rem; }
+
+.btn-del { color: #2e3440; }
+.btn-del:hover { color: #ff4444; }
+
+.empty-note {
+  font-family: 'Share Tech Mono', monospace;
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  padding: 0.4rem 0;
+}
+
+.empty-note::before { content: '> '; color: var(--rust); }
+
+/* ── RIGHT PANEL ── */
+.right {
+  background: var(--ink);
+  border-left: 1px solid var(--border);
+}
+
+/* ── ADD BOX ── */
+.add-box {
+  border-bottom: 1px solid var(--border);
+  background: var(--ink);
+}
+
+.box-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+  margin-bottom: 0.9rem;
+}
+
+.field label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+input[type=text],
+input[type=date],
+input[type=time],
+textarea {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.65rem;
+  transition: border-color 0.14s, box-shadow 0.14s;
+}
+
+input::placeholder { color: #2e3440; }
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--rust);
+  box-shadow: 0 0 8px rgba(0,200,255,0.15);
+}
+
+.date-hint {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--sage);
+  letter-spacing: 0.04em;
+}
+
+.date-hint.err { color: #ff4444; }
+
+.btn-add {
+  background: transparent;
+  border: 1px solid var(--rust);
+  color: var(--rust);
+  border-radius: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  padding: 0.55rem;
+  transition: all 0.15s;
+  box-shadow: 0 0 10px rgba(0,200,255,0.08);
+}
+
+.btn-add:hover {
+  background: var(--rust);
+  color: var(--ink);
+  box-shadow: 0 0 20px rgba(0,200,255,0.3);
+}
+
+/* ── SEARCH BOX ── */
+.search-box { background: var(--ink); }
+
+.search-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.search-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  line-height: 1.7;
+  margin-bottom: 0.65rem;
+}
+
+.chip {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 3px;
+  padding: 3px 8px;
+  letter-spacing: 0.04em;
+  transition: all 0.13s;
+}
+
+.chip:hover {
+  border-color: var(--rust);
+  color: var(--rust);
+  box-shadow: 0 0 6px rgba(0,200,255,0.15);
+}
+
+.btn-search {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  transition: all 0.14s;
+}
+
+.btn-search:hover {
+  border-color: var(--rust);
+  color: var(--rust);
+  box-shadow: 0 0 8px rgba(0,200,255,0.15);
+}
+
+/* ── SEARCH RESULTS ── */
+.search-result-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--rust);
+  letter-spacing: 0.08em;
+}
+
+.search-event {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: none;
+  transition: border-color 0.13s;
+}
+
+.search-event:hover { border-color: rgba(0,200,255,0.35); }
+
+.se-name { font-size: 0.83rem; font-weight: 500; color: #e8edf5; }
+.se-date {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--rust);
+}
+.se-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--gold);
+}
+.se-desc { font-size: 0.72rem; color: var(--muted); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1f2530; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--rust); }
+
+/* ── TOAST ── */
+.toast {
+  background: var(--cream);
+  color: var(--rust);
+  border: 1px solid var(--rust);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  border-radius: 3px;
+  box-shadow: 0 0 20px rgba(0,200,255,0.2);
+}

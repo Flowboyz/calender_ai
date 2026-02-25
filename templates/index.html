@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChronoMind</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Fira+Code:wght@300;400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ink:       #1c1a17;
+        --paper:     #f5f0e8;
+        --cream:     #ede7d9;
+        --warm:      #c8bfb0;
+        --rust:      #b85c38;
+        --rust-lt:   #f2e4db;
+        --gold:      #c9973a;
+        --gold-lt:   #faf3e0;
+        --sage:      #4e7250;
+        --sage-lt:   #e4ede4;
+        --muted:     #7a7060;
+        --border:    #d8cfbe;
+        --shadow:    rgba(28,26,23,0.08);
+      }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: 'Jost', sans-serif;
+        min-height: 100vh;
+        background-image:
+          radial-gradient(ellipse at 10% 10%, rgba(201,151,58,0.07) 0%, transparent 55%),
+          radial-gradient(ellipse at 90% 90%, rgba(184,92,56,0.06) 0%, transparent 55%);
+      }
+
+      /* ── HEADER ── */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid var(--border);
+        background: rgba(245,240,232,0.92);
+        backdrop-filter: blur(10px);
+        position: sticky; top: 0; z-index: 100;
+      }
+      .logo {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.85rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .logo em { color: var(--rust); font-style: italic; }
+      .header-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+      }
+      .today-badge {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.7rem;
+        background: var(--ink);
+        color: var(--paper);
+        padding: 0.28rem 0.75rem;
+        border-radius: 100px;
+        letter-spacing: 0.04em;
+      }
+      .header-sub {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.6rem;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      /* ── LAYOUT ── */
+      .app {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        height: calc(100vh - 61px);
+      }
+
+      /* ── LEFT ── */
+      .left {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* ── CALENDAR ── */
+      .cal-wrap {
+        padding: 1.5rem 2rem 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .cal-nav {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+      .cal-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.8rem;
+        font-weight: 300;
+      }
+      .cal-year { font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--muted); margin-left: 0.35rem; }
+      .nav-row { display: flex; gap: 0.35rem; }
+      .btn-nav {
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 0.28rem 0.6rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.72rem;
+        transition: all 0.15s;
+      }
+      .btn-nav:hover { border-color: var(--rust); color: var(--rust); }
+
+      .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+      }
+      .dlabel {
+        text-align: center;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.6rem;
+        color: var(--muted);
+        padding: 0.3rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .cday {
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 5px 2px 3px;
+        border-radius: 7px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.14s;
+        gap: 2px;
+      }
+      .cday:hover:not(.empty) { background: var(--cream); border-color: var(--border); }
+      .cday.empty { pointer-events: none; }
+      .cday.today { background: var(--gold-lt); border-color: var(--gold); }
+      .cday.today .dnum { color: var(--gold); font-weight: 500; }
+      .cday.selected { background: var(--rust); border-color: var(--rust); }
+      .cday.selected .dnum { color: #fff !important; font-weight: 500; }
+      .cday.selected .pip { background: rgba(255,255,255,0.55); }
+      .dnum { font-family: 'Fira Code', monospace; font-size: 0.78rem; color: var(--ink); line-height: 1; }
+      .cday.other .dnum { color: var(--warm); }
+      .pips { display: flex; gap: 2px; justify-content: center; flex-wrap: wrap; }
+      .pip { width: 4px; height: 4px; border-radius: 50%; background: var(--rust); }
+
+      /* ── EVENTS PANEL ── */
+      .events-wrap {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.2rem 2rem 2rem;
+      }
+      .ev-section-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.2rem;
+        font-weight: 400;
+        margin-bottom: 0.7rem;
+        color: var(--ink);
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+      }
+      .ev-count {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.65rem;
+        color: var(--muted);
+      }
+      .section-rule {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.7rem;
+      }
+      .section-rule span {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .section-rule::before, .section-rule::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .event-card {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.75rem 0.9rem;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 0.45rem;
+        align-items: flex-start;
+        box-shadow: 0 1px 4px var(--shadow);
+        transition: box-shadow 0.14s;
+      }
+      .event-card:hover { box-shadow: 0 3px 10px var(--shadow); }
+      .ev-bar { width: 3px; align-self: stretch; background: var(--rust); border-radius: 3px; flex-shrink: 0; }
+      .ev-bar.upcoming { background: var(--gold); }
+      .ev-body { flex: 1; min-width: 0; }
+      .ev-top { display: flex; align-items: baseline; justify-content: space-between; gap: 0.4rem; }
+      .ev-name { font-size: 0.88rem; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .ev-time { font-family: 'Fira Code', monospace; font-size: 0.62rem; color: var(--muted); white-space: nowrap; }
+      .ev-date-label { font-family: 'Fira Code', monospace; font-size: 0.62rem; color: var(--gold); margin-top: 1px; }
+      .ev-desc { font-size: 0.76rem; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+      .btn-del { background: none; border: none; color: var(--warm); cursor: pointer; font-size: 0.72rem; padding: 2px 3px; border-radius: 4px; transition: color 0.14s; flex-shrink: 0; }
+      .btn-del:hover { color: var(--rust); }
+      .empty-note { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--muted); font-size: 0.92rem; padding: 0.3rem 0; }
+
+      /* ── RIGHT PANEL ── */
+      .right {
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid var(--border);
+        background: rgba(237,231,217,0.4);
+        overflow: hidden;
+      }
+
+      /* Add event form */
+      .add-box {
+        padding: 1.2rem 1.3rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .box-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-bottom: 0.85rem;
+      }
+      .field { margin-bottom: 0.5rem; }
+      .field label {
+        display: block;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.58rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        margin-bottom: 0.22rem;
+      }
+      input[type=text], input[type=date], input[type=time], textarea {
+        width: 100%;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 0.45rem 0.65rem;
+        font-family: 'Jost', sans-serif;
+        font-size: 0.82rem;
+        color: var(--ink);
+        transition: border-color 0.14s;
+      }
+      input:focus, textarea:focus { outline: none; border-color: var(--rust); }
+      input::placeholder { color: var(--warm); }
+      textarea { resize: none; height: 48px; }
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
+      .date-hint {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.6rem;
+        min-height: 14px;
+        margin-top: 3px;
+        color: var(--sage);
+        transition: color 0.15s;
+      }
+      .date-hint.err { color: var(--rust); }
+      .btn-add {
+        width: 100%;
+        background: var(--rust);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.55rem;
+        font-family: 'Jost', sans-serif;
+        font-size: 0.83rem;
+        font-weight: 500;
+        cursor: pointer;
+        margin-top: 0.35rem;
+        transition: background 0.14s;
+      }
+      .btn-add:hover { background: #a34e2e; }
+
+      /* Search box */
+      .search-box {
+        padding: 1rem 1.3rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .search-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.6rem;
+      }
+      .search-sub {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.6rem;
+        color: var(--muted);
+        margin-bottom: 0.65rem;
+        line-height: 1.6;
+      }
+      .search-row { display: flex; gap: 0.4rem; margin-bottom: 0.6rem; }
+      .search-row input { flex: 1; }
+      .btn-search {
+        background: var(--ink);
+        color: var(--paper);
+        border: none;
+        border-radius: 7px;
+        padding: 0.45rem 0.75rem;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.72rem;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: opacity 0.14s;
+      }
+      .btn-search:hover { opacity: 0.8; }
+
+      .chips { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+      .chip {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.6rem;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 3px 8px;
+        border-radius: 100px;
+        cursor: pointer;
+        transition: all 0.14s;
+      }
+      .chip:hover { border-color: var(--rust); color: var(--rust); }
+
+      .search-result-label {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.62rem;
+        color: var(--muted);
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.05em;
+      }
+      .search-results { overflow-y: auto; flex: 1; }
+      .search-event {
+        padding: 0.6rem 0.75rem;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 0.4rem;
+        box-shadow: 0 1px 3px var(--shadow);
+      }
+      .se-top { display: flex; justify-content: space-between; align-items: baseline; }
+      .se-name { font-size: 0.85rem; font-weight: 500; }
+      .se-date { font-family: 'Fira Code', monospace; font-size: 0.62rem; color: var(--gold); }
+      .se-time { font-family: 'Fira Code', monospace; font-size: 0.62rem; color: var(--muted); }
+      .se-desc { font-size: 0.74rem; color: var(--muted); margin-top: 2px; }
+
+      /* Toast */
+      .toast {
+        position: fixed; bottom: 1.5rem; left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        background: var(--ink); color: var(--paper);
+        padding: 0.55rem 1.1rem; border-radius: 100px;
+        font-family: 'Fira Code', monospace; font-size: 0.7rem;
+        transition: transform 0.28s; z-index: 999; white-space: nowrap;
+      }
+      .toast.show { transform: translateX(-50%) translateY(0); }
+
+      ::-webkit-scrollbar { width: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    </style>
+    <link rel="stylesheet" href="/static/css/media.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+  </head>
+  <body>
+
+  <header class="header">
+    <div class="logo">Schedule <em>AI</em></div>
+    <div class="header-meta">
+      <div class="today-badge" id="todayBadge">—</div>
+      <div class="header-sub">Event Calendar · dateparser</div>
+    </div>
+  </header>
+
+  <div class="app">
+
+    <!-- ── LEFT: Calendar + Events ── -->
+    <div class="left">
+      <div class="cal-wrap">
+        <div class="cal-nav">
+          <div>
+            <span class="cal-title" id="monthName">—</span>
+            <span class="cal-year"  id="yearNum">—</span>
+          </div>
+          <div class="nav-row">
+            <button class="btn-nav" onclick="changeMonth(-1)">← prev</button>
+            <button class="btn-nav" onclick="goToday()">today</button>
+            <button class="btn-nav" onclick="changeMonth(1)">next →</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <div class="events-wrap" id="eventsWrap">
+        <div class="empty-note">Click a date to view its events.</div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: Add + Search ── -->
+    <div class="right">
+
+      <!-- Add Event -->
+      <div class="add-box">
+        <div class="box-title">Add Event</div>
+        <div class="field">
+          <label>Title *</label>
+          <input type="text" id="fTitle" placeholder="Meeting, Birthday, Deadline…" />
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <label>Date * <span style="opacity:.6;font-size:.55rem">(natural ok)</span></label>
+            <input type="text" id="fDate" placeholder="next Friday, Mar 15…" oninput="previewDate()" />
+            <div class="date-hint" id="dateHint"></div>
+          </div>
+          <div class="field">
+            <label>Time</label>
+            <input type="time" id="fTime" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea id="fDesc" placeholder="Optional notes…"></textarea>
+        </div>
+        <button class="btn-add" onclick="addEvent()">+ Add Event</button>
+      </div>
+
+      <!-- Smart Search -->
+      <div class="search-box">
+        <div class="search-title">Search Events</div>
+        <div class="search-sub">
+          Powered by dateparser — try natural phrases:
+        </div>
+        <div class="chips">
+          <span class="chip" onclick="quickSearch(this)">upcoming</span>
+          <span class="chip" onclick="quickSearch(this)">this week</span>
+          <span class="chip" onclick="quickSearch(this)">next week</span>
+          <span class="chip" onclick="quickSearch(this)">next month</span>
+          <span class="chip" onclick="quickSearch(this)">next 7 days</span>
+        </div>
+        <div class="search-row">
+          <input type="text" id="searchInput" placeholder="e.g. tomorrow, next month, meeting…"
+                onkeydown="if(event.key==='Enter') doSearch()" />
+          <button class="btn-search" onclick="doSearch()">Search</button>
+        </div>
+        <div class="search-result-label" id="searchLabel" style="display:none"></div>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const MONTHS = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+    const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    let cur = new Date();
+    let selDate = null;
+    let eventMap = {};
+
+    // ── INIT ──
+    (async () => {
+      updateBadge();
+      setInterval(updateBadge, 60000);
+      await loadAll();
+    })();
+
+    function updateBadge() {
+      document.getElementById('todayBadge').textContent =
+        new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    }
+
+    function toISO(y, m, d) {
+      return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    }
+    const todayISO = toISO(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+
+    // ── LOAD ──
+    async function loadAll() {
+      const res  = await fetch('/api/events');
+      const list = await res.json();
+      eventMap = {};
+      list.forEach(e => (eventMap[e.event_date] ??= []).push(e));
+      renderCal();
+      if (selDate) renderDayEvents(selDate);
+    }
+
+    // ── CALENDAR ──
+    function changeMonth(d) { cur.setMonth(cur.getMonth()+d); renderCal(); }
+    function goToday()      { cur = new Date(); renderCal(); }
+
+    function renderCal() {
+      const y = cur.getFullYear(), m = cur.getMonth();
+      document.getElementById('monthName').textContent = MONTHS[m];
+      document.getElementById('yearNum').textContent   = y;
+
+      const g = document.getElementById('calGrid');
+      g.innerHTML = '';
+      DAYS.forEach(d => { const el=document.createElement('div'); el.className='dlabel'; el.textContent=d; g.appendChild(el); });
+
+      const firstWd   = new Date(y,m,1).getDay();
+      const daysInMon = new Date(y,m+1,0).getDate();
+      const daysInPrv = new Date(y,m,0).getDate();
+
+      for (let i=firstWd-1; i>=0; i--) mkCell(g, daysInPrv-i, y, m-1, true);
+      for (let d=1; d<=daysInMon; d++)  mkCell(g, d, y, m, false);
+    }
+
+    function mkCell(grid, dayNum, y, m, other) {
+      const iso = toISO(y, m, dayNum);
+      const el  = document.createElement('div');
+      let cls   = 'cday';
+      if (other)          cls += ' other empty';
+      if (iso===todayISO) cls += ' today';
+      if (iso===selDate)  cls += ' selected';
+      el.className = cls;
+      el.innerHTML = `<span class="dnum">${dayNum}</span>`;
+      const evs = eventMap[iso];
+      if (evs?.length) {
+        const pips = document.createElement('div');
+        pips.className = 'pips';
+        evs.slice(0,4).forEach(() => { const p=document.createElement('div'); p.className='pip'; pips.appendChild(p); });
+        el.appendChild(pips);
+      }
+      if (!other) el.onclick = () => selectDate(iso);
+      grid.appendChild(el);
+    }
+
+    function selectDate(iso) {
+      selDate = iso;
+      // Pre-fill date field with the selected date
+      document.getElementById('fDate').value = iso;
+      document.getElementById('dateHint').textContent = '✓ ' + iso;
+      document.getElementById('dateHint').className = 'date-hint';
+      renderCal();
+      renderDayEvents(iso);
+    }
+
+    function renderDayEvents(iso) {
+      const evs  = eventMap[iso] || [];
+      const wrap = document.getElementById('eventsWrap');
+      const d    = new Date(iso + 'T00:00:00');
+      const label = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+      let html = `
+        <div class="ev-section-title">
+          ${label}
+          <span class="ev-count">${evs.length} event${evs.length!==1?'s':''}</span>
+        </div>
+      `;
+
+      if (!evs.length) {
+        html += '<p class="empty-note">No events on this day.</p>';
+      } else {
+        html += evs.map(e => `
+          <div class="event-card">
+            <div class="ev-bar"></div>
+            <div class="ev-body">
+              <div class="ev-top">
+                <span class="ev-name">${esc(e.title)}</span>
+                <span class="ev-time">${e.event_time||'—'}</span>
+              </div>
+              ${e.description ? `<div class="ev-desc">${esc(e.description)}</div>` : ''}
+            </div>
+            <button class="btn-del" onclick="delEvent(${e.id})" title="Delete">✕</button>
+          </div>
+        `).join('');
+      }
+
+      // Show upcoming events after selected section
+      const upcomingAll = Object.entries(eventMap)
+        .filter(([k]) => k > iso)
+        .sort(([a],[b]) => a.localeCompare(b))
+        .flatMap(([k,evs]) => evs.map(e => ({...e, _dateKey: k})));
+
+      if (upcomingAll.length) {
+        html += `<div class="section-rule" style="margin-top:1.2rem"><span>Upcoming</span></div>`;
+        html += upcomingAll.slice(0,8).map(e => `
+          <div class="event-card">
+            <div class="ev-bar upcoming"></div>
+            <div class="ev-body">
+              <div class="ev-top">
+                <span class="ev-name">${esc(e.title)}</span>
+                <span class="ev-time">${e.event_time||'—'}</span>
+              </div>
+              <div class="ev-date-label">${e.event_date}</div>
+              ${e.description ? `<div class="ev-desc">${esc(e.description)}</div>` : ''}
+            </div>
+            <button class="btn-del" onclick="delEvent(${e.id})" title="Delete">✕</button>
+          </div>
+        `).join('');
+      }
+
+      wrap.innerHTML = html;
+    }
+
+    // ── ADD EVENT ──
+    let hintTimer;
+    async function previewDate() {
+      clearTimeout(hintTimer);
+      const val  = document.getElementById('fDate').value.trim();
+      const hint = document.getElementById('dateHint');
+      if (!val) { hint.textContent=''; return; }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(val)) { hint.textContent='✓ '+val; hint.className='date-hint'; return; }
+      hintTimer = setTimeout(async () => {
+        const res  = await fetch('/api/parse-date',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:val})});
+        const data = await res.json();
+        if (data.date) { hint.textContent='→ '+data.date; hint.className='date-hint'; }
+        else           { hint.textContent='Could not parse date'; hint.className='date-hint err'; }
+      }, 380);
+    }
+
+    async function addEvent() {
+      const title   = document.getElementById('fTitle').value.trim();
+      const rawDate = document.getElementById('fDate').value.trim();
+      const time    = document.getElementById('fTime').value;
+      const desc    = document.getElementById('fDesc').value.trim();
+      if (!title)   return toast('Title is required');
+      if (!rawDate) return toast('Date is required');
+
+      const res  = await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({title, event_date:rawDate, event_time:time, description:desc})});
+      const data = await res.json();
+      if (!res.ok || !data.success) return toast(data.error||'Could not add event');
+
+      document.getElementById('fTitle').value = '';
+      document.getElementById('fDesc').value  = '';
+      document.getElementById('dateHint').textContent = '';
+
+      toast('Event added ✓');
+      await loadAll();
+      if (data.event_date) selectDate(data.event_date);
+    }
+
+    async function delEvent(id) {
+      await fetch(`/api/events/${id}`,{method:'DELETE'});
+      toast('Event removed');
+      await loadAll();
+      if (selDate) renderDayEvents(selDate);
+    }
+
+    // ── SEARCH ──
+    function quickSearch(el) {
+      document.getElementById('searchInput').value = el.textContent;
+      doSearch();
+    }
+
+    async function doSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) return toast('Enter a search query');
+
+      const res  = await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});
+      const data = await res.json();
+
+      const label   = document.getElementById('searchLabel');
+      const results = document.getElementById('searchResults');
+      label.style.display = 'block';
+      label.textContent   = data.label + ` (${data.events.length} found)`;
+
+      if (!data.events.length) {
+        results.innerHTML = '<p class="empty-note" style="font-size:.82rem">No events found.</p>';
+        return;
+      }
+
+      results.innerHTML = data.events.map(e => `
+        <div class="search-event">
+          <div class="se-top">
+            <span class="se-name">${esc(e.title)}</span>
+            <span class="se-date">${e.event_date}</span>
+          </div>
+          ${e.event_time ? `<div class="se-time">${e.event_time}</div>` : ''}
+          ${e.description ? `<div class="se-desc">${esc(e.description)}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    // ── UTILS ──
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    let toastT;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastT);
+      toastT = setTimeout(()=>el.classList.remove('show'), 2500);
+    }
+  </script>
+  <script>
+  (function initMobileNav() {
+    if (window.innerWidth > 480) return;
+
+    const bar = document.createElement('div');
+    bar.className = 'tab-bar';
+    bar.innerHTML = `
+      <button class="tab-btn active" data-panel="left" data-label="calendar">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Calendar
+      </button>
+      <button class="tab-btn" data-panel="right" data-label="add">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Add / Search
+      </button>
+    `;
+    document.body.appendChild(bar);
+
+    document.querySelector('.left').classList.add('tab-active');
+
+    bar.addEventListener('click', e => {
+      const btn = e.target.closest('.tab-btn');
+      if (!btn) return;
+
+      bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const target = btn.dataset.panel;
+      document.querySelector('.left').classList.toggle('tab-active',  target === 'left');
+      document.querySelector('.right').classList.toggle('tab-active', target === 'right');
+    });
+
+  })();  // ← same indent level as the opening line
+  </script>
+  </body>
+</html>
