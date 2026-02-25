@@ -245,5 +245,5 @@ def search():
 
 if __name__ == "__main__":
     init_db()
-    print("✓  ChronoMind is running → http://localhost:5000")
+    print("✓  Schedule AI is running → http://localhost:5000")
     app.run(debug=True, port=5000)
