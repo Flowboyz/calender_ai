@@ -1,21 +1,18 @@
 /*
- * mobile.css — ChronoMind Mobile Edition
+ * mobile.css — Schedule AI Mobile Layout
  * ─────────────────────────────────────────────────────────────────────────────
- * Add this to index.html inside <head>, after the closing </style> tag:
+ * Phone-optimised single-column layout with bottom tab bar.
+ * Link AFTER main.css (and optionally media.css) in index.html:
  *
  *   <link rel="stylesheet" href="/static/mobile.css">
  *
- * Transforms the two-column desktop layout into a single-column mobile UI
- * with a bottom tab bar for navigation between Calendar, Events, and Search.
- * Optimised for screens 480px and below.
+ * Also paste the <script> block at the bottom of this file just before
+ * </body> in index.html to activate the tab bar on mobile.
+ *
+ * Activates only on screens ≤ 480px. Zero effect on desktop.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Fira+Code:wght@400;500&family=Jost:wght@300;400;500&display=swap');
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   MOBILE BREAKPOINT — everything inside applies only on phones
-   ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
 
   /* ── BASE ── */
@@ -29,208 +26,113 @@
   .header {
     padding: 0.75rem 1.1rem;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     z-index: 200;
     height: 54px;
   }
-
-  .logo { font-size: 1.45rem; }
-
-  .today-badge {
-    font-size: 0.6rem;
-    padding: 0.22rem 0.6rem;
-  }
-
+  .logo      { font-size: 1.45rem; }
+  .today-badge { font-size: 0.6rem; padding: 0.22rem 0.6rem; }
   .header-sub { display: none; }
 
-  /* ── KILL DESKTOP GRID — stack everything ── */
+  /* ── KILL DESKTOP GRID ── */
   .app {
     display: block;
     height: 100dvh;
-    padding-top: 54px;   /* header height */
-    padding-bottom: 60px; /* tab bar height */
+    padding-top: 54px;
+    padding-bottom: 60px;
     overflow: hidden;
   }
 
-  /* ── LEFT & RIGHT become full-screen panels ── */
+  /* ── PANELS: full-screen, toggled by JS ── */
   .left, .right {
     position: fixed;
-    top: 54px;
-    left: 0;
-    right: 0;
-    bottom: 60px;
+    top: 54px; left: 0; right: 0; bottom: 60px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    display: none;          /* hidden by default; JS toggles via .tab-active */
+    display: none;
     flex-direction: column;
     border: none;
     width: 100%;
-  }
-
-  .left.tab-active,
-  .right.tab-active {
-    display: flex;
-  }
-
-  /* ── CALENDAR PANEL ── */
-  .cal-wrap {
-    padding: 1rem 1rem 0.75rem;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-
-  .cal-nav {
-    margin-bottom: 0.75rem;
-  }
-
-  .cal-title { font-size: 1.4rem; }
-  .cal-year  { font-size: 0.75rem; }
-
-  .btn-nav {
-    padding: 0.25rem 0.55rem;
-    font-size: 0.68rem;
-  }
-
-  /* Tighter calendar grid on small screens */
-  .cal-grid { gap: 2px; }
-
-  .dlabel {
-    font-size: 0.55rem;
-    padding: 0.25rem 0;
-  }
-
-  .cday {
-    padding: 4px 1px 3px;
-    border-radius: 6px;
-  }
-
-  .dnum { font-size: 0.72rem; }
-
-  .pip { width: 3px; height: 3px; }
-
-  /* ── EVENTS PANEL (inside .left, below calendar) ── */
-  .events-wrap {
-    flex: 1;
-    padding: 1rem 1rem 1.5rem;
-    overflow-y: auto;
-  }
-
-  .ev-section-title {
-    font-size: 1.05rem;
-    margin-bottom: 0.6rem;
-  }
-
-  .ev-count { font-size: 0.6rem; }
-
-  .event-card {
-    padding: 0.65rem 0.8rem;
-    border-radius: 9px;
-    margin-bottom: 0.4rem;
-  }
-
-  .ev-name  { font-size: 0.84rem; }
-  .ev-time  { font-size: 0.58rem; }
-  .ev-desc  { font-size: 0.72rem; }
-
-  .empty-note { font-size: 0.85rem; }
-
-  /* ── RIGHT PANEL (Add + Search) ── */
-  .right {
-    flex-direction: column;
-    overflow-y: auto;
     background: var(--paper);
   }
+  .left.tab-active,
+  .right.tab-active { display: flex; }
 
-  .add-box {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border);
+  /* ── CALENDAR ── */
+  .cal-wrap {
+    padding: 1rem 1rem 0.75rem;
     flex-shrink: 0;
   }
+  .cal-title   { font-size: 1.4rem; }
+  .cal-year    { font-size: 0.75rem; }
+  .btn-nav     { padding: 0.25rem 0.55rem; font-size: 0.68rem; }
+  .cal-grid    { gap: 2px; }
+  .dlabel      { font-size: 0.55rem; padding: 0.25rem 0; }
+  .cday        { padding: 4px 1px 3px; border-radius: 6px; }
+  .dnum        { font-size: 0.72rem; }
+  .pip         { width: 3px; height: 3px; }
 
-  .box-title {
-    font-size: 1rem;
-    margin-bottom: 0.7rem;
-  }
+  /* ── EVENTS PANEL ── */
+  .events-wrap { flex: 1; padding: 1rem 1rem 1.5rem; overflow-y: auto; }
+  .ev-section-title { font-size: 1.05rem; margin-bottom: 0.6rem; }
+  .ev-count    { font-size: 0.6rem; }
+  .event-card  { padding: 0.65rem 0.8rem; border-radius: 9px; margin-bottom: 0.4rem; }
+  .ev-name     { font-size: 0.84rem; }
+  .ev-time     { font-size: 0.58rem; }
+  .ev-desc     { font-size: 0.72rem; }
+  .empty-note  { font-size: 0.85rem; }
 
-  .field { margin-bottom: 0.45rem; }
+  /* ── RIGHT PANEL ── */
+  .right { overflow-y: auto; }
 
+  /* ── ADD BOX ── */
+  .add-box  { padding: 1rem; flex-shrink: 0; }
+  .box-title { font-size: 1rem; margin-bottom: 0.7rem; }
+  .field    { margin-bottom: 0.45rem; }
   .field label { font-size: 0.55rem; }
-
   input[type=text],
   input[type=date],
   input[type=time],
   textarea {
-    font-size: 16px; /* prevents iOS auto-zoom on focus */
+    font-size: 16px; /* prevents iOS zoom on focus */
     padding: 0.55rem 0.7rem;
     border-radius: 8px;
   }
-
-  textarea { height: 60px; }
-
-  .two-col { gap: 0.4rem; }
-
+  textarea  { height: 60px; }
+  .two-col  { gap: 0.4rem; }
   .date-hint { font-size: 0.58rem; }
+  .btn-add  { padding: 0.65rem; font-size: 0.88rem; border-radius: 9px; margin-top: 0.5rem; }
 
-  .btn-add {
-    padding: 0.65rem;
-    font-size: 0.88rem;
-    border-radius: 9px;
-    margin-top: 0.5rem;
-  }
-
-  /* ── SEARCH BOX ── */
-  .search-box {
+  /* ── ASK PANEL ── */
+  .ask-panel {
     flex: 1;
     padding: 1rem;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
   }
+  .ask-title    { font-size: 1rem; margin-bottom: 0.4rem; }
+  .ask-subtitle { font-size: 0.58rem; margin-bottom: 0.5rem; line-height: 1.5; }
 
-  .search-title { font-size: 1rem; margin-bottom: 0.4rem; }
+  /* ── CHIPS ── */
+  .chips { gap: 0.3rem; margin-bottom: 0.6rem; }
+  .chip  { font-size: 0.6rem; padding: 4px 9px; border-radius: 100px; }
 
-  .search-sub {
-    font-size: 0.58rem;
-    margin-bottom: 0.5rem;
-    line-height: 1.5;
-  }
+  /* ── ASK INPUT ── */
+  .ask-row    { gap: 0.4rem; margin-bottom: 0.55rem; }
+  .btn-ask    { padding: 0.5rem 0.75rem; font-size: 0.72rem; border-radius: 8px; }
 
-  .chips {
-    gap: 0.3rem;
-    margin-bottom: 0.6rem;
-    flex-wrap: wrap;
-  }
+  /* ── ANSWER BOX ── */
+  .answer-label  { font-size: 0.58rem; margin-bottom: 0.45rem; }
+  .answer-box    { overflow-y: auto; flex: 1; }
+  .answer-card   { padding: 0.55rem 0.7rem; border-radius: 8px; margin-bottom: 0.35rem; }
+  .ans-name      { font-size: 0.83rem; }
+  .ans-date      { font-size: 0.58rem; }
+  .ans-desc      { font-size: 0.7rem; }
 
-  .chip {
-    font-size: 0.6rem;
-    padding: 4px 9px;
-    border-radius: 100px;
-  }
-
-  .search-row { gap: 0.4rem; margin-bottom: 0.55rem; }
-
-  .btn-search {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.72rem;
-    border-radius: 8px;
-    white-space: nowrap;
-  }
-
-  .search-result-label { font-size: 0.58rem; margin-bottom: 0.45rem; }
-
-  .search-results { overflow-y: auto; flex: 1; }
-
-  .search-event {
-    padding: 0.55rem 0.7rem;
-    border-radius: 8px;
-    margin-bottom: 0.35rem;
-  }
-
-  .se-name { font-size: 0.83rem; }
-  .se-date { font-size: 0.58rem; }
-  .se-desc { font-size: 0.7rem; }
+  /* ── LOADING ── */
+  .ask-loading   { font-size: 0.65rem; }
 
   /* ── TOAST ── */
   .toast {
@@ -241,16 +143,10 @@
     text-align: center;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════
-     BOTTOM TAB BAR
-     Three tabs: Calendar · Events · Search/Add
-     Injected by the JS below via  initMobileNav()
-     ═══════════════════════════════════════════════════════════════════════ */
+  /* ── BOTTOM TAB BAR ── */
   .tab-bar {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 0; left: 0; right: 0;
     height: 60px;
     background: var(--paper);
     border-top: 1px solid var(--border);
@@ -259,7 +155,6 @@
     z-index: 200;
     backdrop-filter: blur(10px);
   }
-
   .tab-btn {
     flex: 1;
     display: flex;
@@ -277,8 +172,8 @@
     text-transform: uppercase;
     transition: color 0.15s;
     -webkit-tap-highlight-color: transparent;
+    position: relative;
   }
-
   .tab-btn svg {
     width: 20px;
     height: 20px;
@@ -289,16 +184,8 @@
     stroke-linejoin: round;
     transition: stroke 0.15s;
   }
-
-  .tab-btn.active {
-    color: var(--rust);
-  }
-
-  .tab-btn.active svg {
-    stroke: var(--rust);
-  }
-
-  /* Active indicator dot above active tab */
+  .tab-btn.active { color: var(--rust); }
+  .tab-btn.active svg { stroke: var(--rust); }
   .tab-btn.active::before {
     content: '';
     position: absolute;
@@ -312,3 +199,53 @@
 } /* end @media (max-width: 480px) */
 
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE TAB BAR SCRIPT
+   ─────────────────────────────────────────────────────────────────────────
+   Copy the script below and paste it just before </body> in index.html.
+   It builds the two-tab bottom bar and handles panel switching.
+
+<script>
+(function initMobileNav() {
+  if (window.innerWidth > 480) return;
+
+  const bar = document.createElement('div');
+  bar.className = 'tab-bar';
+  bar.innerHTML = `
+    <button class="tab-btn active" data-panel="left">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8"  y1="2" x2="8"  y2="6"/>
+        <line x1="3"  y1="10" x2="21" y2="10"/>
+      </svg>
+      Calendar
+    </button>
+    <button class="tab-btn" data-panel="right">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"/>
+        <line x1="12" y1="8"  x2="12" y2="16"/>
+        <line x1="8"  y1="12" x2="16" y2="12"/>
+      </svg>
+      Add / Ask
+    </button>
+  `;
+  document.body.appendChild(bar);
+
+  document.querySelector('.left').classList.add('tab-active');
+
+  bar.addEventListener('click', e => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+
+    bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const target = btn.dataset.panel;
+    document.querySelector('.left').classList.toggle('tab-active',  target === 'left');
+    document.querySelector('.right').classList.toggle('tab-active', target === 'right');
+  });
+})();
+</script>
+   ─────────────────────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════ */
